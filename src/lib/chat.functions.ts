@@ -70,6 +70,70 @@ export const askAboutAkash = createServerFn({ method: "POST" })
     }).parse,
   )
   .handler(async ({ data }) => {
+    const userMessage = data.messages[data.messages.length - 1].content.toLowerCase();
+
+    // ----------------------------------------------------
+    // PRE-PROGRAMMED RULE-BASED RESPONSES (WORKS OFFLINE / WITHOUT API KEY)
+    // ----------------------------------------------------
+    if (userMessage.match(/\b(hi|hello|hey|greetings|yo)\b/)) {
+      return {
+        text: "Hey! I'm Akash's AI assistant. We are super excited to have you here! Ask me about my ECE studies at BGSIT, my tech startup Hustle Hives, my projects, hackathon wins, or how to contact me."
+      };
+    }
+    if (userMessage.match(/\b(about|who is|bio|background|profile|details)\b/)) {
+      return {
+        text: "Akash AP is a Final Year Electronics & Communication Engineering (ECE) student at BGS Institute of Technology (BGSIT) and the active IEEE Student Branch Chair. He is passionate about combining intelligent software (AI/ML) with advanced hardware (IoT, robotics, embedded systems) to solve real-world problems. He is also the founder of Hustle Hives!"
+      };
+    }
+    if (userMessage.match(/\b(skill|stack|language|technology|framework|python|javascript|react)\b/)) {
+      return {
+        text: "Akash has a diverse and powerful skill set:\n\n• **Software:** React, JavaScript, Python, Flask, OpenCV (Computer Vision), TensorFlow, HTML5/CSS3/Tailwind, Cloud (AWS, Cloudflare), Tableau, Git/GitHub.\n\n• **Hardware:** ESP32, Arduino, Raspberry Pi, Embedded Systems, VLSI, Verilog, and Microcontroller interfacing."
+      };
+    }
+    if (userMessage.match(/\b(project|work|portfolio|showcase)\b/) && !userMessage.match(/\b(receptionist|silkworm|waste|plant|tracker)\b/)) {
+      return {
+        text: "Akash has built over 15+ advanced projects. Key highlights include:\n\n1. **Smart AI Receptionist:** Voice assistant & computer vision receptionist using OpenCV and Flask.\n2. **Silkworm Farm Automation:** Smart sericulture monitoring using ESP32 and environment sensors.\n3. **Smart Waste Management:** Real-time garbage bin tracking via IoT.\n4. **Medicinal Plants Detection:** AI plants identification via TensorFlow.\n\nType the name of any project (e.g., 'receptionist' or 'silkworm') to hear more details!"
+      };
+    }
+    if (userMessage.match(/\b(receptionist|reception)\b/)) {
+      return {
+        text: "The **Smart AI Receptionist** is an intelligent assistant using Flask, voice recognition, and OpenCV. It automates reception inquiries, maps directions, and manages visitor flow."
+      };
+    }
+    if (userMessage.match(/\b(silkworm|agriculture|rearing|sericulture)\b/)) {
+      return {
+        text: "The **Silkworm Farm Automation** is a smart sericulture system powered by ESP32. It constantly monitors and automatically regulates temperature and humidity to ensure optimal silkworm growth."
+      };
+    }
+    if (userMessage.match(/\b(waste|garbage|bin|city)\b/)) {
+      return {
+        text: "The **Smart Waste Management** project uses IoT sensors placed in garbage bins to transmit real-time fill levels to a cloud dashboard, helping cities optimize collection routes."
+      };
+    }
+    if (userMessage.match(/\b(plant|medicinal|herb|tensorflow)\b/)) {
+      return {
+        text: "The **Medicinal Plants Detection** app uses TensorFlow computer vision models to identify leaves of medicinal plants and instantly display their health benefits and care details."
+      };
+    }
+    if (userMessage.match(/\b(hustle|hive|startup|services|business|freelance|hire)\b/)) {
+      return {
+        text: "**Hustle Hives** is Akash's tech startup providing full-spectrum digital and physical services:\n\n• **Software:** Full-stack websites & AI apps.\n\n• **Hardware:** Intelligent embedded systems & circuit designs.\n\n• **Printing:** Banners, T-shirts, and ID cards.\n\n• **Laptop Services:** OS installs, repairs, & upgrades.\n\nVisit the live portal at https://hustle-hives.akashapuser.workers.dev/ or reach out directly at hustlehivesofficial@gmail.com / +91 7795428138!"
+      };
+    }
+    if (userMessage.match(/\b(achievement|hackathon|prize|mce|award|contest|win)\b/)) {
+      return {
+        text: "Akash is an avid competitor and has built a stellar track record:\n\n• **1st Place** at the Malnad College of Engineering 36-Hour National Hackathon (Hassan).\n\n• **2nd Place** at AIT Ideathon, PESCE Mandya Project Expo, and MIT Mysore Project Exhibition.\n\n• **4th Place** at State Level Jnana Vignana Tantragyana Mela.\n\n• Winner of 6 major prizes across 10+ state hackathons in Karnataka!"
+      };
+    }
+    if (userMessage.match(/\b(contact|email|phone|call|address|whatsapp|social|github|linkedin|instagram|youtube)\b/)) {
+      return {
+        text: "You can connect with Akash directly:\n\n• **Personal Email:** akashapuser@gmail.com\n\n• **Startup Email:** hustlehivesofficial@gmail.com\n\n• **Phone/WhatsApp:** +91 7795428138\n\n• **LinkedIn:** linkedin.com/in/akash-ap\n\n• **GitHub:** github.com/Akash4075\n\n• **Instagram/YouTube:** @akashh__ap (where he shares tech content with 1.2k+ subscribers!)"
+      };
+    }
+
+    // ----------------------------------------------------
+    // FALLBACK TO LLM IF API KEY IS CONFIGURED
+    // ----------------------------------------------------
     const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
     const lovableKey = process.env.LOVABLE_API_KEY;
 
@@ -120,8 +184,8 @@ export const askAboutAkash = createServerFn({ method: "POST" })
       return { text: result.text };
     }
 
-    // Friendly developer fallback message when no API keys are present
+    // Friendly offline interactive mode instructions
     return {
-      text: "Hi Akash! To enable your AI assistant locally, please get a free API Key from Google AI Studio (https://aistudio.google.com/) and add it to your project as `GEMINI_API_KEY` (either in a `.env` file in the project root or in your environment variables). Once added, I will be fully functional!",
+      text: "Hi! I am currently running in offline pre-programmed mode. Ask me about **about**, **skills**, **projects**, **Hustle Hives**, **hackathons**, or **contact** to get instant pre-programmed details! (To chat freely with AI, please get a free key from Google AI Studio and paste it as `GEMINI_API_KEY` in your `.env` file).",
     };
   });
