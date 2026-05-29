@@ -30,8 +30,8 @@
   --color-ring: var(--ring);
   --color-neon: var(--neon);
   --color-neon-soft: var(--neon-soft);
-  --font-display: "Orbitron", system-ui, sans-serif;
-  --font-sans: "Rajdhani", system-ui, sans-serif;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Outfit", system-ui, sans-serif;
 }
 
 :root {
