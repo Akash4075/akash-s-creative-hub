@@ -70,13 +70,58 @@ export const askAboutAkash = createServerFn({ method: "POST" })
     }).parse,
   )
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const gateway = createLovableAiGatewayProvider(key);
-    const result = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
-      system: SYSTEM_PROMPT,
-      messages: data.messages,
-    });
-    return { text: result.text };
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    const lovableKey = process.env.LOVABLE_API_KEY;
+
+    if (geminiKey) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: SYSTEM_PROMPT }],
+              },
+              contents: data.messages.map((m) => ({
+                role: m.role === "user" ? "user" : "model",
+                parts: [{ text: m.content }],
+              })),
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(`Gemini API error: ${response.status} - ${errText}`);
+        }
+
+        const json = await response.json();
+        const text =
+          json.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "Sorry, I couldn't process that response.";
+        return { text };
+      } catch (err) {
+        console.error("Direct Gemini API error:", err);
+        throw err;
+      }
+    }
+
+    if (lovableKey) {
+      const gateway = createLovableAiGatewayProvider(lovableKey);
+      const result = await generateText({
+        model: gateway("google/gemini-3-flash-preview"),
+        system: SYSTEM_PROMPT,
+        messages: data.messages,
+      });
+      return { text: result.text };
+    }
+
+    // Friendly developer fallback message when no API keys are present
+    return {
+      text: "Hi Akash! To enable your AI assistant locally, please get a free API Key from Google AI Studio (https://aistudio.google.com/) and add it to your project as `GEMINI_API_KEY` (either in a `.env` file in the project root or in your environment variables). Once added, I will be fully functional!",
+    };
   });
